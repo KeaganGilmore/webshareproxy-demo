@@ -6,6 +6,7 @@ import json
 import uuid
 from dotenv import load_dotenv
 from datetime import datetime
+from urllib.parse import urljoin
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,23 +17,29 @@ api_key = os.getenv('API_KEY')
 if not api_key:
     raise ValueError("API_KEY not found in environment variables")
 
-# Define the URL for the API request
-url = "https://proxy.webshare.io/api/proxy/list/"
+# Define the base URL for the API request
+base_url = "https://proxy.webshare.io/api/proxy/list/"
 
 # Set the headers for the request
 headers = {
     "Authorization": f"Token {api_key}"
 }
 
-# Make the GET request to the API
-response = requests.get(url, headers=headers)
-
-# Check if the request was successful
-if response.status_code == 200:
-    proxies = response.json().get('results', [])
-else:
-    print(f"Failed to retrieve proxies: {response.status_code} - {response.text}")
+def fetch_all_proxies():
     proxies = []
+    url = base_url
+    while url:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            proxies.extend(data.get('results', []))
+            url = data.get('next')
+            if url:
+                url = urljoin(base_url, url)
+        else:
+            print(f"Failed to retrieve proxies: {response.status_code} - {response.text}")
+            break
+    return proxies
 
 async def test_proxy(session, proxy):
     required_keys = ['username', 'password', 'proxy_address', 'ports']
@@ -56,7 +63,7 @@ async def test_proxies(proxies):
         return [{"proxy": proxy, "is_viable": result} for proxy, result in zip(proxies, results)]
 
 async def main():
-
+    proxies = fetch_all_proxies()
     if proxies:
         results = await test_proxies(proxies)
         uid = uuid.uuid4()
