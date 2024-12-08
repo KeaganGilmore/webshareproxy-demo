@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "webshareproxy-demo"
+version = "0.1.0"
+description = "Simple demo script for using webshareproxy"
+authors = ["KeaganGilmore <keagangilmore@gmail.com>"]
+license = "GNU General Public License version 3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+webshareproxy = "^0.0.10"
+requests = "^2.32.3"
+asyncio = "^3.4.3"
+aiohttp = "^3.11.10"
+uuid = "^1.30"
+python-dotenv = "^1.0.1"
+datetime = "^5.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
